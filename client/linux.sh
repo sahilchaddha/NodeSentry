@@ -15,6 +15,10 @@ IP_JSON=${IP_JSON%,} # Remove trailing comma
 IP_JSON+="}"
 EXTERNAL_IP=$(curl -s http://checkip.dyndns.org | sed 's/[^0-9.]//g')
 echo $EXTERNAL_IP
+
+# Get server URL from env, argument, or default
+SERVER_URL="${SERVER_URL:-${1:-http://localhost:3000}}"
+
 # Build the JSON payload using heredoc for proper formatting
 JSON_PAYLOAD=$(cat <<EOF
 {
@@ -29,8 +33,8 @@ JSON_PAYLOAD=$(cat <<EOF
 }
 EOF
 )
-
-curl -X POST http://localhost:3000/api/data \
-	-H "Content-Type: application/json" \
-	-H "X-API-Key: test-api-key-12345" \
-	-d "$JSON_PAYLOAD"
+echo $SERVER_URL
+curl -X POST "$SERVER_URL/api/data" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: test-api-key-12345" \
+  -d "$JSON_PAYLOAD"
