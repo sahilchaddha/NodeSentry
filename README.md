@@ -24,9 +24,17 @@ The `client/linux.sh` script is designed to run on your Mac or Linux machines. I
 
 ### Example usage
 
-```bash
-sh client/linux.sh
-```
+You can specify the NodeSentry server URL in two ways:
+
+1. **As an environment variable:**
+  ```bash
+  SERVER_URL="http://your-server:3000" sh client/linux.sh
+  ```
+2. **As a script argument:**
+  ```bash
+  sh client/linux.sh http://your-server:3000
+  ```
+If neither is provided, the script defaults to `http://localhost:3000`.
 
 ### Example payload sent to server
 
