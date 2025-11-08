@@ -1,4 +1,51 @@
 # NodeSentry
+
+## Why NodeSentry?
+
+If you have a homelab with multiple Macs, you may have noticed that macOS devices frequently change their MAC addresses for privacy reasons. This causes issues with DHCP servers, which assign new IP addresses each time the MAC changes, ignoring static or reserved IP tables. As a result, it's difficult to reliably track your devices and their IPs on the network.
+
+NodeSentry solves this by providing a central server where each client (Mac, Linux, etc.) can periodically report its current IP, MAC addresses, hostname, and custom tags. This allows you to view all your devices and their latest network info in one place, regardless of how often their MAC addresses change.
+
+## Client Linux Script
+
+The `client/linux.sh` script is designed to run on your Mac or Linux machines. It collects the current IP addresses and network interface information, then sends this data to the NodeSentry server using a secure API key.
+
+### What does the script do?
+
+1. Extracts all IP addresses assigned to the machine.
+2. Maps each IP to its network interface.
+3. Builds a JSON payload including:
+   - Device name
+   - Local IP
+   - Hostname
+   - Custom tags (e.g., location)
+   - `mac_addresses`: a mapping of interface names to IP addresses
+4. Sends the payload to the NodeSentry server using a POST request.
+
+### Example usage
+
+```bash
+sh client/linux.sh
+```
+
+### Example payload sent to server
+
+```json
+{
+  "name": "my-laptop",
+  "local_ip": "192.168.1.100",
+  "hostname": "my-laptop.local",
+  "custom_tags": {
+    "location": "office"
+  },
+  "mac_addresses": {
+    "en0": "192.168.1.100",
+    "en1": "192.168.1.101"
+  }
+}
+```
+
+This ensures your server always has the latest IP and network info for each device, even if the MAC address changes.
 ## HomeLab Node Watcher
 
 A lightweight monitoring solution for tracking nodes in your homelab environment. NodeSentry provides a simple API for clients to report their system information and a web interface to view all collected data.
