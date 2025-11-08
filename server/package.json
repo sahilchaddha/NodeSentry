@@ -1,0 +1,18 @@
+{
+  "name": "nodesentry-server",
+  "version": "1.0.0",
+  "description": "HomeLab Node Watcher - Server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": ["homelab", "monitoring", "node-watcher"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
+  }
+}
