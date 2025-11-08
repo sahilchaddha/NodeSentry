@@ -212,6 +212,33 @@ class Database {
   }
 
   /**
+   * Update custom tags for a client
+   * @param {number} id - Client ID
+   * @param {Object} customTags - New custom tags object
+   * @returns {Promise<boolean>} - Success status
+   */
+  updateCustomTags(id, customTags) {
+    const sql = `
+      UPDATE client_data
+      SET custom_tags = ?, last_updated = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `;
+
+    const params = [JSON.stringify(customTags || {}), id];
+
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, params, function(err) {
+        if (err) {
+          console.error('Error updating custom tags:', err);
+          reject(err);
+        } else {
+          resolve(this.changes > 0);
+        }
+      });
+    });
+  }
+
+  /**
    * Insert new link
    * @param {Object} link - Link object with name and url
    * @returns {Promise<number>} - ID of inserted row

@@ -288,6 +288,61 @@ curl -X POST http://localhost:3000/api/links \
   }'
 ```
 
+#### PATCH /api/data/:id/tags
+
+Update custom tags for a specific client.
+
+**Authentication**: HTTP Basic Auth
+
+**URL Parameters**:
+- `id` (integer): Client ID
+
+**Request Headers**:
+```
+Content-Type: application/json
+Authorization: Basic <base64-encoded-credentials>
+```
+
+**Request Body**:
+```json
+{
+  "custom_tags": {
+    "location": "datacenter",
+    "environment": "production",
+    "owner": "ops-team"
+  }
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "success": true,
+  "message": "Custom tags updated successfully"
+}
+```
+
+**Error Responses**:
+- `400 Bad Request`: Invalid client ID or custom_tags format
+- `401 Unauthorized`: Missing or invalid credentials
+- `404 Not Found`: Client not found
+- `500 Internal Server Error`: Server error
+
+**Example with curl**:
+```bash
+curl -X PATCH http://localhost:3000/api/data/1/tags \
+  -u admin:admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_tags": {
+      "location": "office",
+      "environment": "dev"
+    }
+  }'
+```
+
+**Note**: Updating tags also refreshes the client's `last_updated` timestamp.
+
 ### Web Interface
 
 Access the web dashboard at `http://localhost:3000/`
@@ -301,6 +356,7 @@ Access the web dashboard at `http://localhost:3000/`
   - Warning: Updated 5-30 minutes ago (yellow badge)
   - Offline: No update for 30+ minutes (red badge)
 - **Last Updated Tracking** - See when each client last reported in with human-readable time (e.g., "2 minutes ago")
+- **Edit Custom Tags** - Click the edit button on any client to add, modify, or remove custom tags (location, environment, OS, etc.)
 - View all client data in a sortable table
 - Auto-refresh every 30 seconds (can be toggled)
 - Manual refresh button

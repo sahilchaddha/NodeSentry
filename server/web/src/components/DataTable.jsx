@@ -1,7 +1,7 @@
 import React from 'react';
 import './DataTable.css';
 
-function DataTable({ data }) {
+function DataTable({ data, onEditTags }) {
   if (!data || data.length === 0) {
     return (
       <div className="empty-state">
@@ -115,7 +115,27 @@ function DataTable({ data }) {
                 <td>{item.local_ip || '-'}</td>
                 <td>{item.external_ip || '-'}</td>
                 <td className="json-cell">{formatJSON(item.mac_addresses)}</td>
-                <td className="json-cell">{formatJSON(item.custom_tags)}</td>
+                <td className="tags-cell">
+                  <div className="tags-cell-content">
+                    <div className="tags-display">
+                      {Object.keys(item.custom_tags || {}).length === 0 ? (
+                        <span className="no-tags-text">-</span>
+                      ) : (
+                        formatJSON(item.custom_tags)
+                      )}
+                    </div>
+                    <button
+                      className="edit-tags-btn"
+                      onClick={() => onEditTags(item)}
+                      title="Edit tags"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
                 <td className="code-cell">
                   {item.ifconfig_raw ? (
                     <pre className="ifconfig-preview">{item.ifconfig_raw}</pre>

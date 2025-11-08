@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import Links from './components/Links';
 import AddLinkModal from './components/AddLinkModal';
+import EditTagsModal from './components/EditTagsModal';
 import './App.css';
 
 function App() {
@@ -12,6 +13,8 @@ function App() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditTagsModalOpen, setIsEditTagsModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -63,6 +66,31 @@ function App() {
     const linksResponse = await fetch('/api/links');
     const linksResult = await linksResponse.json();
     setLinks(linksResult.data || []);
+  };
+
+  const handleEditTags = (client) => {
+    setSelectedClient(client);
+    setIsEditTagsModalOpen(true);
+  };
+
+  const handleUpdateTags = async (clientId, customTags) => {
+    const response = await fetch(`/api/data/${clientId}/tags`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ custom_tags: customTags }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update tags');
+    }
+
+    // Refresh data after updating
+    const dataResponse = await fetch('/api/data');
+    const dataResult = await dataResponse.json();
+    setData(dataResult.data || []);
   };
 
   useEffect(() => {
@@ -129,7 +157,7 @@ function App() {
         ) : (
           <>
             <Links links={links} onAddClick={() => setIsModalOpen(true)} />
-            <DataTable data={data} />
+            <DataTable data={data} onEditTags={handleEditTags} />
           </>
         )}
       </main>
@@ -138,6 +166,16 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddLink}
+      />
+
+      <EditTagsModal
+        isOpen={isEditTagsModalOpen}
+        onClose={() => {
+          setIsEditTagsModalOpen(false);
+          setSelectedClient(null);
+        }}
+        onSubmit={handleUpdateTags}
+        client={selectedClient}
       />
 
       <footer className="footer">
