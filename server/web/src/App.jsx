@@ -6,6 +6,7 @@ import EditTagsModal from './components/EditTagsModal';
 import './App.css';
 
 function App() {
+  const appName = import.meta.env.VITE_APP_NAME || 'NodeSentry';
   const [data, setData] = useState([]);
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +95,11 @@ function App() {
   };
 
   useEffect(() => {
+    // Update document title with app name
+    document.title = `${appName} - HomeLab Node Watcher`;
+  }, [appName]);
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -119,7 +125,7 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1>NodeSentry</h1>
+          <h1>{appName}</h1>
           <p className="subtitle">HomeLab Node Watcher</p>
         </div>
         <div className="header-controls">
@@ -179,7 +185,7 @@ function App() {
       />
 
       <footer className="footer">
-        <p>NodeSentry v1.0.0 - HomeLab Node Monitoring System</p>
+        <p>{appName} v1.0.0 - HomeLab Node Monitoring System</p>
       </footer>
     </div>
   );
