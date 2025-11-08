@@ -92,7 +92,6 @@ function DataTable({ data, onEditTags }) {
             <th>External IP</th>
             <th>MAC Addresses</th>
             <th>Custom Tags</th>
-            <th>Ifconfig Raw</th>
             <th>Last Updated</th>
             <th>Created At</th>
           </tr>
@@ -135,11 +134,6 @@ function DataTable({ data, onEditTags }) {
                       </svg>
                     </button>
                   </div>
-                </td>
-                <td className="code-cell">
-                  {item.ifconfig_raw ? (
-                    <pre className="ifconfig-preview">{item.ifconfig_raw}</pre>
-                  ) : '-'}
                 </td>
                 <td className="time-cell">
                   <div className="time-display">
