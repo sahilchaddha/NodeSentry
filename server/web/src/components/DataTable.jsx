@@ -11,13 +11,39 @@ function DataTable({ data }) {
     );
   }
 
+  const parseDateTime = (dateString) => {
+    // SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS"
+    // We need to explicitly treat this as UTC and convert to local time
+    if (!dateString) return new Date();
+
+    // If the string doesn't have timezone info, SQLite returns UTC
+    // Add 'Z' to explicitly mark it as UTC if not already present
+    if (!dateString.includes('Z') && !dateString.includes('+')) {
+      // SQLite format: "2024-01-15 10:30:45"
+      // Convert to ISO format and add Z for UTC
+      const isoString = dateString.replace(' ', 'T') + 'Z';
+      return new Date(isoString);
+    }
+
+    return new Date(dateString);
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    const date = parseDateTime(dateString);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   };
 
   const getTimeAgo = (dateString) => {
     const now = new Date();
-    const past = new Date(dateString);
+    const past = parseDateTime(dateString);
     const diffMs = now - past;
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
@@ -34,7 +60,7 @@ function DataTable({ data }) {
 
   const getClientStatus = (lastUpdated) => {
     const now = new Date();
-    const last = new Date(lastUpdated);
+    const last = parseDateTime(lastUpdated);
     const diffMins = Math.floor((now - last) / 60000);
 
     if (diffMins < 5) return 'online';
