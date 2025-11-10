@@ -79,6 +79,19 @@ function DataTable({ data, onEditTags }) {
     );
   };
 
+  const formatIPArray = (ipArray) => {
+    if (!ipArray || !Array.isArray(ipArray) || ipArray.length === 0) {
+      return '-';
+    }
+    return (
+      <div className="ip-list">
+        {ipArray.map((ip, index) => (
+          <div key={index} className="ip-item">{ip}</div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="table-container">
       <table className="data-table">
@@ -90,7 +103,6 @@ function DataTable({ data, onEditTags }) {
             <th>Hostname</th>
             <th>Local IP</th>
             <th>External IP</th>
-            <th>MAC Addresses</th>
             <th>Custom Tags</th>
             <th>Last Updated</th>
             <th>Created At</th>
@@ -111,9 +123,8 @@ function DataTable({ data, onEditTags }) {
                 <td>{item.id}</td>
                 <td className="text-bold">{item.name}</td>
                 <td>{item.hostname || '-'}</td>
-                <td>{item.local_ip || '-'}</td>
+                <td>{formatIPArray(item.local_ip)}</td>
                 <td>{item.external_ip || '-'}</td>
-                <td className="json-cell">{formatJSON(item.mac_addresses)}</td>
                 <td className="tags-cell">
                   <div className="tags-cell-content">
                     <div className="tags-display">

@@ -43,7 +43,6 @@ class Database {
         name TEXT NOT NULL UNIQUE,
         local_ip TEXT,
         external_ip TEXT,
-        mac_addresses TEXT,
         ifconfig_raw TEXT,
         hostname TEXT,
         custom_tags TEXT,
@@ -228,12 +227,11 @@ class Database {
   insertClientData(data) {
     const sql = `
       INSERT INTO client_data
-      (name, local_ip, external_ip, mac_addresses, ifconfig_raw, hostname, custom_tags, last_updated)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      (name, local_ip, external_ip, ifconfig_raw, hostname, custom_tags, last_updated)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(name) DO UPDATE SET
         local_ip = excluded.local_ip,
         external_ip = excluded.external_ip,
-        mac_addresses = excluded.mac_addresses,
         ifconfig_raw = excluded.ifconfig_raw,
         hostname = excluded.hostname,
         custom_tags = excluded.custom_tags,
@@ -242,9 +240,8 @@ class Database {
 
     const params = [
       data.name,
-      data.local_ip || null,
+      JSON.stringify(data.local_ip || []),
       data.external_ip || null,
-      JSON.stringify(data.mac_addresses || {}),
       data.ifconfig_raw || null,
       data.hostname || null,
       JSON.stringify(data.custom_tags || {})
@@ -280,7 +277,7 @@ class Database {
           // Parse JSON fields
           const parsedRows = rows.map(row => ({
             ...row,
-            mac_addresses: JSON.parse(row.mac_addresses || '{}'),
+            local_ip: JSON.parse(row.local_ip || '[]'),
             custom_tags: JSON.parse(row.custom_tags || '{}')
           }));
           resolve(parsedRows);
@@ -306,7 +303,7 @@ class Database {
           // Parse JSON fields
           const parsedRow = {
             ...row,
-            mac_addresses: JSON.parse(row.mac_addresses || '{}'),
+            local_ip: JSON.parse(row.local_ip || '[]'),
             custom_tags: JSON.parse(row.custom_tags || '{}')
           };
           resolve(parsedRow);

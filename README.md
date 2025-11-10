@@ -13,13 +13,12 @@ The `client/linux.sh` script is designed to run on your Mac or Linux machines. I
 ### What does the script do?
 
 1. Extracts all IP addresses assigned to the machine.
-2. Maps each IP to its network interface.
+2. Collects all network interface IPs.
 3. Builds a JSON payload including:
    - Device name
-   - Local IP
+   - Local IPs (as an array)
    - Hostname
    - Custom tags (e.g., location)
-   - `mac_addresses`: a mapping of interface names to IP addresses
 4. Sends the payload to the NodeSentry server using a POST request.
 
 ### Example usage
@@ -41,15 +40,14 @@ If neither is provided, the script defaults to `http://localhost:3000`.
 ```json
 {
   "name": "my-laptop",
-  "local_ip": "192.168.1.100",
   "hostname": "my-laptop.local",
   "custom_tags": {
     "location": "office"
   },
-  "mac_addresses": {
-    "en0": "192.168.1.100",
-    "en1": "192.168.1.101"
-  }
+  "local_ip": [
+    "192.168.1.100",
+    "192.168.1.101"
+  ]
 }
 ```
 
@@ -172,12 +170,11 @@ X-API-Key: your-api-key-here
 ```json
 {
   "name": "my-laptop",
-  "local_ip": "192.168.1.100",
+  "local_ip": [
+    "192.168.1.100",
+    "192.168.1.101"
+  ],
   "external_ip": "203.0.113.1",
-  "mac_addresses": {
-    "eth0": "00:1B:44:11:3A:B7",
-    "wlan0": "00:1B:44:11:3A:B8"
-  },
   "ifconfig_raw": "eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n...",
   "hostname": "my-laptop.local",
   "custom_tags": {
@@ -192,9 +189,8 @@ X-API-Key: your-api-key-here
 - `name` (string): Client identifier
 
 **Optional Fields**:
-- `local_ip` (string): Local/private IP address
+- `local_ip` (array): Array of local/private IP addresses
 - `external_ip` (string): Public IP address
-- `mac_addresses` (object): Key-value pairs of interface names and MAC addresses
 - `ifconfig_raw` (string): Raw output from ifconfig/ipconfig command
 - `hostname` (string): System hostname
 - `custom_tags` (object): Any custom key-value pairs for categorization
@@ -221,7 +217,7 @@ curl -X POST http://localhost:3000/api/data \
   -H "X-API-Key: test-api-key-12345" \
   -d '{
     "name": "my-laptop",
-    "local_ip": "192.168.1.100",
+    "local_ip": ["192.168.1.100", "192.168.1.101"],
     "hostname": "my-laptop.local",
     "custom_tags": {
       "location": "office"
@@ -244,11 +240,11 @@ Retrieve all stored client data.
     {
       "id": 1,
       "name": "my-laptop",
-      "local_ip": "192.168.1.100",
+      "local_ip": [
+        "192.168.1.100",
+        "192.168.1.101"
+      ],
       "external_ip": "203.0.113.1",
-      "mac_addresses": {
-        "eth0": "00:1B:44:11:3A:B7"
-      },
       "ifconfig_raw": "eth0: flags=4163...",
       "hostname": "my-laptop.local",
       "custom_tags": {
@@ -458,9 +454,8 @@ Stores information about monitored nodes/clients. The `name` field is unique, en
 |-----------------|---------|---------------------------------------|
 | id              | INTEGER | Auto-incrementing primary key         |
 | name            | TEXT    | Client name (required, unique)        |
-| local_ip        | TEXT    | Local IP address                      |
+| local_ip        | TEXT    | JSON array of local IP addresses      |
 | external_ip     | TEXT    | External/public IP address            |
-| mac_addresses   | TEXT    | JSON string of MAC addresses          |
 | ifconfig_raw    | TEXT    | Raw ifconfig output                   |
 | hostname        | TEXT    | System hostname                       |
 | custom_tags     | TEXT    | JSON string of custom tags            |

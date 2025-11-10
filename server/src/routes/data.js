@@ -10,9 +10,8 @@ const apiKeyAuth = require('../middleware/apiKeyAuth');
  * Expected payload:
  * {
  *   "name": "client-name",
- *   "local_ip": "192.168.1.100",
+ *   "local_ip": ["192.168.1.100", "192.168.1.101"],
  *   "external_ip": "203.0.113.1" (optional),
- *   "mac_addresses": { "eth0": "00:1B:44:11:3A:B7" },
  *   "ifconfig_raw": "raw ifconfig output",
  *   "hostname": "my-laptop",
  *   "custom_tags": { "location": "office", "os": "ubuntu" }
@@ -24,7 +23,6 @@ router.post('/data', apiKeyAuth, async (req, res) => {
       name,
       local_ip,
       external_ip,
-      mac_addresses,
       ifconfig_raw,
       hostname,
       custom_tags
@@ -45,7 +43,6 @@ router.post('/data', apiKeyAuth, async (req, res) => {
       name,
       local_ip,
       external_ip,
-      mac_addresses,
       ifconfig_raw,
       hostname,
       custom_tags

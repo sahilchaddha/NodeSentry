@@ -8,7 +8,7 @@ const basicAuth = require('../middleware/basicAuth');
  * Requires HTTP Basic Authentication
  *
  * Returns array of all client records with:
- * - id, name, local_ip, external_ip, mac_addresses
+ * - id, name, local_ip (array), external_ip
  * - ifconfig_raw, hostname, custom_tags, created_at
  */
 router.get('/data', basicAuth, async (req, res) => {
