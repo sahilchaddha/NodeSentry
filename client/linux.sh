@@ -2,7 +2,7 @@
 INET=( $(ifconfig | awk '/inet /{print $2}') )
 LOCAL_IP=($(ipconfig getifaddr en0))
 LOCAL_HOSTNAME=$(hostname -s)
-CLIENT_NAME="mac-client"
+CLIENT_NAME="${CLIENT_NAME:-${2:-mac-client}}"
 for i in "${!INET[@]}"; do
 	echo "$i: ${INET[$i]}"
 done
@@ -22,14 +22,14 @@ SERVER_URL="${SERVER_URL:-${1:-http://localhost:3000}}"
 # Build the JSON payload using heredoc for proper formatting
 JSON_PAYLOAD=$(cat <<EOF
 {
-	"name": "$CLIENT_NAME",
-	"local_ip": "$LOCAL_IP",
-	"external_ip": "$EXTERNAL_IP",
-	"hostname": "$LOCAL_HOSTNAME.local",
-	"custom_tags": {
-		"location": "office"
-	},
-	"mac_addresses": $IP_JSON
+  "name": "$CLIENT_NAME",
+  "local_ip": "$LOCAL_IP",
+  "external_ip": "$EXTERNAL_IP",
+  "hostname": "$LOCAL_HOSTNAME.local",
+  "custom_tags": {
+    "location": "office"
+  },
+  "mac_addresses": $IP_JSON
 }
 EOF
 )
