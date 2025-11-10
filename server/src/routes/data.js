@@ -65,4 +65,85 @@ router.post('/data', apiKeyAuth, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/data/:name
+ * Endpoint to retrieve data for a specific client by name
+ * Requires API key authentication via X-API-Key header
+ *
+ * Example: GET /api/data/my-laptop
+ */
+router.get('/data/:name', apiKeyAuth, async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    // Get database instance from app
+    const db = req.app.get('db');
+
+    // Fetch client data by name
+    const clientData = await db.getClientDataByName(name);
+
+    if (!clientData) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: clientData
+    });
+  } catch (error) {
+    console.error('Error retrieving client data:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/data/:name/links
+ * Endpoint to retrieve all links for a specific client by name
+ * Requires API key authentication via X-API-Key header
+ *
+ * Example: GET /api/data/my-laptop/links
+ */
+router.get('/data/:name/links', apiKeyAuth, async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    // Get database instance from app
+    const db = req.app.get('db');
+
+    // First verify the client exists
+    const clientData = await db.getClientDataByName(name);
+
+    if (!clientData) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client not found'
+      });
+    }
+
+    // Fetch links for the client
+    const links = await db.getLinksByClientName(name);
+
+    res.status(200).json({
+      success: true,
+      count: links.length,
+      client_name: name,
+      data: links
+    });
+  } catch (error) {
+    console.error('Error retrieving client links:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

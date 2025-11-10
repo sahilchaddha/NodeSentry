@@ -16,6 +16,32 @@
   font-weight: 600;
 }
 
+.links-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-dropdown {
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-dropdown:hover {
+  border-color: #3498db;
+}
+
+.filter-dropdown:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
 .add-link-btn {
   background-color: #27ae60;
   color: white;
@@ -56,10 +82,35 @@
   color: #999;
 }
 
+.links-grouped-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group-header {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
 .links-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
+}
+
+.link-card-wrapper {
+  position: relative;
 }
 
 .link-card {
@@ -94,19 +145,46 @@
   color: white;
 }
 
+.link-icon-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
 .link-info {
   flex: 1;
   min-width: 0;
 }
 
+.link-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .link-name {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #2c3e50;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.client-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background-color: #3498db;
+  color: white;
+}
+
+.client-badge.global-badge {
+  background-color: #95a5a6;
 }
 
 .link-url {
@@ -129,6 +207,40 @@
   transform: translate(2px, -2px);
 }
 
+.link-edit-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+  color: #7f8c8d;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.link-card-wrapper:hover .link-edit-btn {
+  opacity: 1;
+}
+
+.link-edit-btn:hover {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+  transform: scale(1.1);
+}
+
+.link-edit-btn:active {
+  transform: scale(1);
+}
+
 @media (max-width: 768px) {
   .links-grid {
     grid-template-columns: 1fr;
@@ -140,7 +252,18 @@
     gap: 12px;
   }
 
+  .links-controls {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .filter-dropdown,
   .add-link-btn {
     width: 100%;
+  }
+
+  /* Always show edit button on mobile */
+  .link-edit-btn {
+    opacity: 1;
   }
 }

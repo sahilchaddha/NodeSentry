@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import Links from './components/Links';
 import AddLinkModal from './components/AddLinkModal';
+import EditLinkModal from './components/EditLinkModal';
 import EditTagsModal from './components/EditTagsModal';
 import './App.css';
 
@@ -14,6 +15,8 @@ function App() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditLinkModalOpen, setIsEditLinkModalOpen] = useState(false);
+  const [selectedLink, setSelectedLink] = useState(null);
   const [isEditTagsModalOpen, setIsEditTagsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
 
@@ -64,6 +67,47 @@ function App() {
     }
 
     // Refresh links after adding
+    const linksResponse = await fetch('/api/links');
+    const linksResult = await linksResponse.json();
+    setLinks(linksResult.data || []);
+  };
+
+  const handleEditLink = (link) => {
+    setSelectedLink(link);
+    setIsEditLinkModalOpen(true);
+  };
+
+  const handleUpdateLink = async (linkId, linkData) => {
+    const response = await fetch(`/api/links/${linkId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(linkData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update link');
+    }
+
+    // Refresh links after updating
+    const linksResponse = await fetch('/api/links');
+    const linksResult = await linksResponse.json();
+    setLinks(linksResult.data || []);
+  };
+
+  const handleDeleteLink = async (linkId) => {
+    const response = await fetch(`/api/links/${linkId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete link');
+    }
+
+    // Refresh links after deleting
     const linksResponse = await fetch('/api/links');
     const linksResult = await linksResponse.json();
     setLinks(linksResult.data || []);
@@ -162,7 +206,11 @@ function App() {
           <div className="loading">Loading...</div>
         ) : (
           <>
-            <Links links={links} onAddClick={() => setIsModalOpen(true)} />
+            <Links
+              links={links}
+              onAddClick={() => setIsModalOpen(true)}
+              onEditClick={handleEditLink}
+            />
             <DataTable data={data} onEditTags={handleEditTags} />
           </>
         )}
@@ -172,6 +220,19 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddLink}
+        clients={data}
+      />
+
+      <EditLinkModal
+        isOpen={isEditLinkModalOpen}
+        onClose={() => {
+          setIsEditLinkModalOpen(false);
+          setSelectedLink(null);
+        }}
+        onSubmit={handleUpdateLink}
+        onDelete={handleDeleteLink}
+        link={selectedLink}
+        clients={data}
       />
 
       <EditTagsModal

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AddLinkModal.css';
 
-function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
+function EditLinkModal({ isOpen, onClose, onSubmit, onDelete, link, clients = [] }) {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [clientName, setClientName] = useState('');
@@ -9,6 +9,18 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
   const [groupName, setGroupName] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Populate form when link changes
+  useEffect(() => {
+    if (link) {
+      setName(link.name || '');
+      setUrl(link.url || '');
+      setClientName(link.client_name || '');
+      setIcon(link.icon || '🔗');
+      setGroupName(link.group_name || '');
+    }
+  }, [link]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,43 +59,48 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
       }
 
       // Add group_name if provided
-      if (groupName.trim()) {
+      if (groupName) {
         linkData.group_name = groupName.trim();
       }
 
-      await onSubmit(linkData);
-      // Reset form
-      setName('');
-      setUrl('');
-      setClientName('');
-      setIcon('🔗');
-      setGroupName('');
-      setError('');
+      await onSubmit(link.id, linkData);
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to add link');
+      setError(err.message || 'Failed to update link');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${link.name}"?`)) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      await onDelete(link.id);
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Failed to delete link');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleClose = () => {
-    setName('');
-    setUrl('');
-    setClientName('');
-    setIcon('🔗');
-    setGroupName('');
     setError('');
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !link) return null;
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Add New Link</h2>
+          <h2>Edit Link</h2>
           <button className="close-btn" onClick={handleClose}>
             &times;
           </button>
@@ -91,72 +108,72 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="link-name">Name</label>
+            <label htmlFor="edit-link-name">Name</label>
             <input
               type="text"
-              id="link-name"
+              id="edit-link-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., GitHub"
-              disabled={submitting}
+              disabled={submitting || deleting}
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="link-url">URL</label>
+            <label htmlFor="edit-link-url">URL</label>
             <input
               type="text"
-              id="link-url"
+              id="edit-link-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="e.g., https://github.com"
-              disabled={submitting}
+              disabled={submitting || deleting}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="link-icon">
+            <label htmlFor="edit-link-icon">
               Icon (Optional)
               <span className="field-hint"> - Paste an emoji</span>
             </label>
             <input
               type="text"
-              id="link-icon"
+              id="edit-link-icon"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
               placeholder="🔗"
-              disabled={submitting}
+              disabled={submitting || deleting}
               maxLength="4"
               style={{ fontSize: '24px' }}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="link-group">
+            <label htmlFor="edit-link-group">
               Group (Optional)
               <span className="field-hint"> - Organize links into groups</span>
             </label>
             <input
               type="text"
-              id="link-group"
+              id="edit-link-group"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g., Development, Social, Work"
-              disabled={submitting}
+              disabled={submitting || deleting}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="link-client">
+            <label htmlFor="edit-link-client">
               Client (Optional)
               <span className="field-hint"> - Leave empty for global link</span>
             </label>
             <select
-              id="link-client"
+              id="edit-link-client"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              disabled={submitting}
+              disabled={submitting || deleting}
             >
               <option value="">None (Global Link)</option>
               {clients.map((client) => (
@@ -172,18 +189,27 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
           <div className="modal-actions">
             <button
               type="button"
+              className="btn-danger"
+              onClick={handleDelete}
+              disabled={submitting || deleting}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+            <div style={{ flex: 1 }}></div>
+            <button
+              type="button"
               className="btn-secondary"
               onClick={handleClose}
-              disabled={submitting}
+              disabled={submitting || deleting}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="btn-primary"
-              disabled={submitting}
+              disabled={submitting || deleting}
             >
-              {submitting ? 'Adding...' : 'Add Link'}
+              {submitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -192,4 +218,4 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
   );
 }
 
-export default AddLinkModal;
+export default EditLinkModal;
