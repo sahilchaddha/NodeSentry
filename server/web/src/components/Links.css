@@ -42,9 +42,8 @@
   border-color: #3498db;
 }
 
+.check-status-btn,
 .add-link-btn {
-  background-color: #27ae60;
-  color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
@@ -54,13 +53,36 @@
   transition: all 0.2s;
 }
 
+.check-status-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.check-status-btn:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.check-status-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-link-btn {
+  background-color: #27ae60;
+  color: white;
+}
+
 .add-link-btn:hover {
   background-color: #229954;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.add-link-btn:active {
+.add-link-btn:active,
+.check-status-btn:active {
   transform: translateY(0);
 }
 
@@ -187,6 +209,51 @@
   background-color: #95a5a6;
 }
 
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-ok {
+  background-color: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+  animation: pulse-green 2s infinite;
+}
+
+.status-error {
+  background-color: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+.status-checking {
+  background-color: #f39c12;
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+  animation: pulse-yellow 1s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(39, 174, 96, 0.9);
+  }
+}
+
+@keyframes pulse-yellow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(243, 156, 18, 0.9);
+  }
+}
+
 .link-url {
   margin: 0;
   font-size: 13px;
@@ -258,6 +325,7 @@
   }
 
   .filter-dropdown,
+  .check-status-btn,
   .add-link-btn {
     width: 100%;
   }

@@ -1,8 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import './Links.css';
 
 function Links({ links, onAddClick, onEditClick }) {
   const [filter, setFilter] = useState('all');
+  const [linkStatuses, setLinkStatuses] = useState({});
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [checkingLinks, setCheckingLinks] = useState(new Set());
 
   // Get unique client names for filter dropdown
   const clientNames = useMemo(() => {
@@ -41,6 +44,95 @@ function Links({ links, onAddClick, onEditClick }) {
     return groups;
   }, [filteredLinks]);
 
+  // Check status of a single link
+  const checkLinkStatus = async (link) => {
+    // Mark this link as being checked
+    setCheckingLinks(prev => new Set(prev).add(link.id));
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(link.url, {
+        method: 'HEAD',
+        mode: 'no-cors', // Avoid CORS issues
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+
+      clearTimeout(timeoutId);
+
+      // Remove from checking set
+      setCheckingLinks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(link.id);
+        return newSet;
+      });
+
+      // With no-cors mode, we can't read the status, but if fetch succeeds, the URL is reachable
+      return {
+        id: link.id,
+        url: link.url,
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      // Remove from checking set
+      setCheckingLinks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(link.id);
+        return newSet;
+      });
+
+      // Check if it was aborted (timeout)
+      if (error.name === 'AbortError') {
+        return {
+          id: link.id,
+          url: link.url,
+          ok: false,
+          error: 'Timeout'
+        };
+      }
+
+      // Network error or unreachable
+      return {
+        id: link.id,
+        url: link.url,
+        ok: false,
+        error: error.message || 'Unreachable'
+      };
+    }
+  };
+
+  // Check status of all links
+  const checkLinkStatuses = async () => {
+    if (links.length === 0) return;
+
+    setCheckingStatus(true);
+
+    try {
+      // Check all links in parallel
+      const statusChecks = await Promise.all(
+        links.map(link => checkLinkStatus(link))
+      );
+
+      const statusMap = {};
+      statusChecks.forEach(status => {
+        statusMap[status.id] = status;
+      });
+      setLinkStatuses(statusMap);
+    } catch (error) {
+      console.error('Error checking link statuses:', error);
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
+
+  // Check statuses on mount and when links change
+  useEffect(() => {
+    checkLinkStatuses();
+  }, [links.length]); // Only re-check when number of links changes
+
   return (
     <div className="links-section">
       <div className="links-header">
@@ -61,6 +153,14 @@ function Links({ links, onAddClick, onEditClick }) {
               </option>
             ))}
           </select>
+          <button
+            className="check-status-btn"
+            onClick={checkLinkStatuses}
+            disabled={checkingStatus || links.length === 0}
+            title="Check link status"
+          >
+            {checkingStatus ? 'Checking...' : '🔄 Check Status'}
+          </button>
           <button className="add-link-btn" onClick={onAddClick}>
             + Add Link
           </button>
@@ -111,6 +211,24 @@ function Links({ links, onAddClick, onEditClick }) {
                       </div>
                       <div className="link-info">
                         <div className="link-name-row">
+                          {(checkingLinks.has(link.id) || linkStatuses[link.id]) && (
+                            <span
+                              className={`status-indicator ${
+                                checkingLinks.has(link.id)
+                                  ? 'status-checking'
+                                  : linkStatuses[link.id].ok
+                                  ? 'status-ok'
+                                  : 'status-error'
+                              }`}
+                              title={
+                                checkingLinks.has(link.id)
+                                  ? 'Checking...'
+                                  : linkStatuses[link.id].ok
+                                  ? 'Online - URL is reachable'
+                                  : `Offline: ${linkStatuses[link.id].error || 'Unreachable'}`
+                              }
+                            ></span>
+                          )}
                           <h3 className="link-name">{link.name}</h3>
                           {link.client_name ? (
                             <span className="client-badge">{link.client_name}</span>

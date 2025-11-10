@@ -8,6 +8,7 @@ import './App.css';
 
 function App() {
   const appName = import.meta.env.VITE_APP_NAME || 'NodeSentry';
+  const appDescription = import.meta.env.VITE_APP_DESCRIPTION || 'HomeLab Node Watcher';
   const [data, setData] = useState([]);
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -140,8 +141,8 @@ function App() {
 
   useEffect(() => {
     // Update document title with app name
-    document.title = `${appName} - HomeLab Node Watcher`;
-  }, [appName]);
+    document.title = `${appName} - ${appDescription}`;
+  }, [appName, appDescription]);
 
   useEffect(() => {
     fetchData();
@@ -170,7 +171,7 @@ function App() {
       <header className="header">
         <div className="header-content">
           <h1>{appName}</h1>
-          <p className="subtitle">HomeLab Node Watcher</p>
+          <p className="subtitle">{appDescription}</p>
         </div>
         <div className="header-controls">
           <div className="status-info">
@@ -246,7 +247,7 @@ function App() {
       />
 
       <footer className="footer">
-        <p>{appName} v1.0.0 - HomeLab Node Monitoring System</p>
+        <p>{appName} - {appDescription}</p>
       </footer>
     </div>
   );
