@@ -59,6 +59,7 @@ class Database {
         client_id INTEGER,
         icon TEXT,
         group_name TEXT,
+        notes TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (client_id) REFERENCES client_data(id) ON DELETE CASCADE
       )
@@ -149,6 +150,7 @@ class Database {
           const hasClientId = columns.some(col => col.name === 'client_id');
           const hasIcon = columns.some(col => col.name === 'icon');
           const hasGroupName = columns.some(col => col.name === 'group_name');
+          const hasNotes = columns.some(col => col.name === 'notes');
 
           const migrations = [];
 
@@ -170,6 +172,13 @@ class Database {
             migrations.push({
               name: 'group_name',
               sql: 'ALTER TABLE links ADD COLUMN group_name TEXT'
+            });
+          }
+
+          if (!hasNotes) {
+            migrations.push({
+              name: 'notes',
+              sql: 'ALTER TABLE links ADD COLUMN notes TEXT'
             });
           }
 
@@ -343,13 +352,13 @@ class Database {
 
   /**
    * Insert new link
-   * @param {Object} link - Link object with name, url, optional client_id, icon, and group_name
+   * @param {Object} link - Link object with name, url, optional client_id, icon, group_name, and notes
    * @returns {Promise<number>} - ID of inserted row
    */
   insertLink(link) {
     const sql = `
-      INSERT INTO links (name, url, client_id, icon, group_name)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO links (name, url, client_id, icon, group_name, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
@@ -357,7 +366,8 @@ class Database {
       link.url,
       link.client_id || null,
       link.icon || null,
-      link.group_name || null
+      link.group_name || null,
+      link.notes || null
     ];
 
     return new Promise((resolve, reject) => {
@@ -457,13 +467,13 @@ class Database {
   /**
    * Update a link
    * @param {number} id - Link ID
-   * @param {Object} linkData - Link data to update (name, url, client_id, icon, group_name)
+   * @param {Object} linkData - Link data to update (name, url, client_id, icon, group_name, notes)
    * @returns {Promise<boolean>} - Success status
    */
   updateLink(id, linkData) {
     const sql = `
       UPDATE links
-      SET name = ?, url = ?, client_id = ?, icon = ?, group_name = ?
+      SET name = ?, url = ?, client_id = ?, icon = ?, group_name = ?, notes = ?
       WHERE id = ?
     `;
 
@@ -473,6 +483,7 @@ class Database {
       linkData.client_id !== undefined ? linkData.client_id : null,
       linkData.icon !== undefined ? linkData.icon : null,
       linkData.group_name !== undefined ? linkData.group_name : null,
+      linkData.notes !== undefined ? linkData.notes : null,
       id
     ];
 

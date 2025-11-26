@@ -7,6 +7,7 @@ function EditLinkModal({ isOpen, onClose, onSubmit, onDelete, link, clients = []
   const [clientName, setClientName] = useState('');
   const [icon, setIcon] = useState('🔗');
   const [groupName, setGroupName] = useState('');
+  const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -19,6 +20,7 @@ function EditLinkModal({ isOpen, onClose, onSubmit, onDelete, link, clients = []
       setClientName(link.client_name || '');
       setIcon(link.icon || '🔗');
       setGroupName(link.group_name || '');
+      setNotes(link.notes || '');
     }
   }, [link]);
 
@@ -61,6 +63,11 @@ function EditLinkModal({ isOpen, onClose, onSubmit, onDelete, link, clients = []
       // Add group_name if provided
       if (groupName) {
         linkData.group_name = groupName.trim();
+      }
+
+      // Add notes if provided
+      if (notes !== undefined) {
+        linkData.notes = notes.trim();
       }
 
       await onSubmit(link.id, linkData);
@@ -161,6 +168,21 @@ function EditLinkModal({ isOpen, onClose, onSubmit, onDelete, link, clients = []
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g., Development, Social, Work"
               disabled={submitting || deleting}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edit-link-notes">
+              Notes (Optional)
+              <span className="field-hint"> - Add description or comments</span>
+            </label>
+            <textarea
+              id="edit-link-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g., This is the production server dashboard"
+              disabled={submitting || deleting}
+              rows="3"
             />
           </div>
 

@@ -7,6 +7,7 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
   const [clientName, setClientName] = useState('');
   const [icon, setIcon] = useState('🔗');
   const [groupName, setGroupName] = useState('');
+  const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,6 +52,11 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
         linkData.group_name = groupName.trim();
       }
 
+      // Add notes if provided
+      if (notes.trim()) {
+        linkData.notes = notes.trim();
+      }
+
       await onSubmit(linkData);
       // Reset form
       setName('');
@@ -58,6 +64,7 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
       setClientName('');
       setIcon('🔗');
       setGroupName('');
+      setNotes('');
       setError('');
       onClose();
     } catch (err) {
@@ -73,6 +80,7 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
     setClientName('');
     setIcon('🔗');
     setGroupName('');
+    setNotes('');
     setError('');
     onClose();
   };
@@ -144,6 +152,21 @@ function AddLinkModal({ isOpen, onClose, onSubmit, clients = [] }) {
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g., Development, Social, Work"
               disabled={submitting}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="link-notes">
+              Notes (Optional)
+              <span className="field-hint"> - Add description or comments</span>
+            </label>
+            <textarea
+              id="link-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g., This is the production server dashboard"
+              disabled={submitting}
+              rows="3"
             />
           </div>
 

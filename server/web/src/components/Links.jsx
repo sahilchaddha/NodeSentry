@@ -230,6 +230,11 @@ function Links({ links, onAddClick, onEditClick }) {
                             ></span>
                           )}
                           <h3 className="link-name">{link.name}</h3>
+                          {link.notes && (
+                            <span className="notes-indicator" title={link.notes}>
+                              ℹ️
+                            </span>
+                          )}
                           {link.client_name ? (
                             <span className="client-badge">{link.client_name}</span>
                           ) : (
@@ -237,6 +242,9 @@ function Links({ links, onAddClick, onEditClick }) {
                           )}
                         </div>
                         <p className="link-url">{link.url}</p>
+                        {link.notes && (
+                          <p className="link-notes">{link.notes}</p>
+                        )}
                       </div>
                       <div className="link-arrow">
                         <svg

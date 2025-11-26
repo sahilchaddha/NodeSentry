@@ -52,12 +52,13 @@ router.get('/links', basicAuth, async (req, res) => {
  * {
  *   "name": "GitHub",
  *   "url": "https://github.com",
- *   "client_name": "my-laptop" (optional)
+ *   "client_name": "my-laptop" (optional),
+ *   "notes": "Some notes about this link" (optional)
  * }
  */
 router.post('/links', basicAuth, async (req, res) => {
   try {
-    const { name, url, client_name, icon, group_name } = req.body;
+    const { name, url, client_name, icon, group_name, notes } = req.body;
 
     // Validate required fields
     if (!name || !url) {
@@ -97,7 +98,8 @@ router.post('/links', basicAuth, async (req, res) => {
       url,
       client_id,
       icon: icon || null,
-      group_name: group_name || null
+      group_name: group_name || null,
+      notes: notes || null
     });
 
     res.status(201).json({
@@ -106,7 +108,8 @@ router.post('/links', basicAuth, async (req, res) => {
       id,
       client_name: client_name || null,
       icon: icon || null,
-      group_name: group_name || null
+      group_name: group_name || null,
+      notes: notes || null
     });
   } catch (error) {
     console.error('Error adding link:', error);
@@ -126,13 +129,14 @@ router.post('/links', basicAuth, async (req, res) => {
  * {
  *   "name": "Updated Name",
  *   "url": "https://updated-url.com",
- *   "client_name": "my-laptop" (optional - use null or empty string to make it global)
+ *   "client_name": "my-laptop" (optional - use null or empty string to make it global),
+ *   "notes": "Updated notes" (optional)
  * }
  */
 router.patch('/links/:id', basicAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, url, client_name, icon, group_name } = req.body;
+    const { name, url, client_name, icon, group_name, notes } = req.body;
 
     // Validate required fields
     if (!name || !url) {
@@ -172,7 +176,8 @@ router.patch('/links/:id', basicAuth, async (req, res) => {
       url,
       client_id,
       icon: icon !== undefined ? icon : undefined,
-      group_name: group_name !== undefined ? group_name : undefined
+      group_name: group_name !== undefined ? group_name : undefined,
+      notes: notes !== undefined ? notes : undefined
     });
 
     if (!updated) {
@@ -188,7 +193,8 @@ router.patch('/links/:id', basicAuth, async (req, res) => {
       id: parseInt(id),
       client_name: client_name || null,
       icon: icon || null,
-      group_name: group_name || null
+      group_name: group_name || null,
+      notes: notes !== undefined ? notes : null
     });
   } catch (error) {
     console.error('Error updating link:', error);
