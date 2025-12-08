@@ -7,12 +7,18 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js"
   },
-  "keywords": ["homelab", "monitoring", "node-watcher"],
+  "keywords": [
+    "homelab",
+    "monitoring",
+    "node-watcher"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "connect-sqlite3": "^0.9.16",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-session": "^1.18.2",
     "sqlite3": "^5.1.7"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Login from './components/Login';
 import DataTable from './components/DataTable';
 import Links from './components/Links';
 import AddLinkModal from './components/AddLinkModal';
@@ -9,6 +10,8 @@ import './App.css';
 function App() {
   const appName = import.meta.env.VITE_APP_NAME || 'NodeSentry';
   const appDescription = import.meta.env.VITE_APP_DESCRIPTION || 'HomeLab Node Watcher';
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [data, setData] = useState([]);
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,14 +24,47 @@ function App() {
   const [isEditTagsModalOpen, setIsEditTagsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
 
+  const checkAuth = async () => {
+    try {
+      setAuthLoading(true);
+      const response = await fetch('/api/auth/check', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsAuthenticated(data.authenticated);
+      } else {
+        setIsAuthenticated(false);
+      }
+    } catch (err) {
+      console.error('Auth check failed:', err);
+      setIsAuthenticated(false);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      setIsAuthenticated(false);
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const [dataResponse, linksResponse] = await Promise.all([
-        fetch('/api/data'),
-        fetch('/api/links')
+        fetch('/api/data', { credentials: 'include' }),
+        fetch('/api/links', { credentials: 'include' })
       ]);
 
       if (!dataResponse.ok) {
@@ -59,6 +95,7 @@ function App() {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(linkData),
     });
 
@@ -68,7 +105,7 @@ function App() {
     }
 
     // Refresh links after adding
-    const linksResponse = await fetch('/api/links');
+    const linksResponse = await fetch('/api/links', { credentials: 'include' });
     const linksResult = await linksResponse.json();
     setLinks(linksResult.data || []);
   };
@@ -84,6 +121,7 @@ function App() {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(linkData),
     });
 
@@ -93,7 +131,7 @@ function App() {
     }
 
     // Refresh links after updating
-    const linksResponse = await fetch('/api/links');
+    const linksResponse = await fetch('/api/links', { credentials: 'include' });
     const linksResult = await linksResponse.json();
     setLinks(linksResult.data || []);
   };
@@ -101,6 +139,7 @@ function App() {
   const handleDeleteLink = async (linkId) => {
     const response = await fetch(`/api/links/${linkId}`, {
       method: 'DELETE',
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -109,7 +148,7 @@ function App() {
     }
 
     // Refresh links after deleting
-    const linksResponse = await fetch('/api/links');
+    const linksResponse = await fetch('/api/links', { credentials: 'include' });
     const linksResult = await linksResponse.json();
     setLinks(linksResult.data || []);
   };
@@ -125,6 +164,7 @@ function App() {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ custom_tags: customTags }),
     });
 
@@ -134,10 +174,15 @@ function App() {
     }
 
     // Refresh data after updating
-    const dataResponse = await fetch('/api/data');
+    const dataResponse = await fetch('/api/data', { credentials: 'include' });
     const dataResult = await dataResponse.json();
     setData(dataResult.data || []);
   };
+
+  useEffect(() => {
+    // Check authentication on mount
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     // Update document title with app name
@@ -145,8 +190,11 @@ function App() {
   }, [appName, appDescription]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Fetch data only if authenticated
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (autoRefresh) {
@@ -165,6 +213,16 @@ function App() {
   const toggleAutoRefresh = () => {
     setAutoRefresh(!autoRefresh);
   };
+
+  // Show loading during auth check
+  if (authLoading) {
+    return <div className="loading">Checking authentication...</div>;
+  }
+
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={checkAuth} />;
+  }
 
   return (
     <div className="app">
@@ -192,6 +250,9 @@ function App() {
           </button>
           <button className="refresh-btn" onClick={handleRefresh} disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh Now'}
+          </button>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
           </button>
         </div>
       </header>
