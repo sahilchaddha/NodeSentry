@@ -143,4 +143,28 @@ router.get('/data/:name/links', apiKeyAuth, async (req, res) => {
   }
 });
 
+router.get('/all', apiKeyAuth, async (req, res) => {
+  try {
+    // Get database instance from app
+    const db = req.app.get('db');
+
+    // Fetch all client data
+    const data = await db.getAllClientData();
+
+    res.json({
+      success: true,
+      count: data.length,
+      data
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;
+
+
